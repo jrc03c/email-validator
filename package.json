@@ -1,0 +1,23 @@
+{
+  "name": "@jrc03c/email-validator",
+  "version": "0.0.1",
+  "description": "",
+  "main": "email-validator.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jrc03c/email-validator.git"
+  },
+  "keywords": [],
+  "author": "jrc03c",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jrc03c/email-validator/issues"
+  },
+  "homepage": "https://github.com/jrc03c/email-validator#readme",
+  "devDependencies": {
+    "jest": "^27.5.1"
+  }
+}

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Email Validator Demo</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+
+    <style>
+      *,
+      input {
+        font-family: monospace;
+      }
+
+      html {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        width: calc(768px - 2em);
+        min-width: calc(768px - 2em);
+        max-width: calc(768px - 2em);
+        margin: 1em auto;
+        padding: 0;
+      }
+
+      body,
+      input {
+        font-size: 1.5rem;
+      }
+
+      p {
+        margin-bottom: 1em;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5em;
+        border-radius: 4px;
+        border: 1px solid gray;
+      }
+
+      input[type="submit"] {
+        padding: 0.5em;
+        cursor: pointer;
+        border-radius: 4px;
+        border: 1px solid gray;
+      }
+
+      #message {
+        padding: 1em;
+        border-radius: 4px;
+        background-color: rgb(235, 235, 235);
+        color: gray;
+        border: 1px solid gray;
+        font-weight: bold;
+      }
+
+      #message.is-valid {
+        background-color: hsl(142, 52%, 96%);
+        color: hsl(141, 71%, 48%);
+        border: 1px solid hsl(141, 71%, 48%);
+      }
+
+      #message.is-invalid {
+        background-color: hsl(347, 90%, 96%);
+        color: hsl(348, 100%, 61%);
+        border: 1px solid hsl(348, 100%, 61%);
+      }
+
+      @media (max-width: 768px) {
+        body {
+          width: calc(100% - 2em);
+          min-width: calc(100% - 2em);
+          max-width: calc(100% - 2em);
+          margin: 1em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Email Validator Demo</h1>
+
+    <form id="email-validator-form">
+      <p>
+        <input type="text" id="email-field" autofocus />
+      </p>
+
+      <p>
+        <input type="submit" value="Check" />
+      </p>
+    </form>
+
+    <div id="message">Status: NONE</div>
+
+    <script src="email-validator.js"></script>
+    <script>
+      // run tests
+      const items = [
+        { email: "someone@example.com", shouldPass: true },
+        { email: "s.o.m.e.o.n.e@e.x.a.m.p.l.e.com", shouldPass: true },
+        { email: "someone+test@example.com", shouldPass: true },
+        { email: "someone@example+test.com", shouldPass: true },
+        { email: "someone@example", shouldPass: false },
+        { email: "someone@雨.com", shouldPass: true },
+        { email: "雨@example.com", shouldPass: true },
+        { email: "雨@雨.雨", shouldPass: false },
+        { email: "someone@1.2.3.4", shouldPass: false },
+        { email: "@example.com", shouldPass: false },
+        { email: "someone@", shouldPass: false },
+        { email: "someone@example.thisshouldfail", shouldPass: false },
+        { email: "someoneexamplecom", shouldPass: false },
+        { email: "someone.example@com", shouldPass: false },
+        { email: "someone@123.456.789", shouldPass: false },
+        { email: "SOMEONE@EXAMPLE.COM", shouldPass: true },
+        { email: "someone@.com", shouldPass: false },
+        { email: "someone@example test.com", shouldPass: false },
+      ]
+
+      emailValidator.fetchTopLevelDomainList().then(() => {
+        items.forEach(item => {
+          if (emailValidator.validate(item.email) !== item.shouldPass) {
+            throw new Error(
+              `The email address "${item.email}" was ${
+                item.shouldPass ? "supposed" : "not supposed"
+              } to be labelled as valid, but it ${
+                item.shouldPass ? "wasn't" : "was"
+              }!`
+            )
+          }
+        })
+      })
+
+      console.log("All tests passed!")
+
+      // set up demo app
+      const form = document.getElementById("email-validator-form")
+      const emailField = document.getElementById("email-field")
+      const messageContainer = document.getElementById("message")
+
+      emailField.addEventListener("keydown", () => {
+        messageContainer.classList.remove("is-valid")
+        messageContainer.classList.remove("is-invalid")
+        messageContainer.innerText = "Status: NONE"
+      })
+
+      form.addEventListener("submit", event => {
+        event.stopPropagation()
+        event.preventDefault()
+
+        messageContainer.classList.remove("is-valid")
+        messageContainer.classList.remove("is-invalid")
+
+        const isValid = emailValidator.validate(emailField.value)
+
+        if (isValid) {
+          messageContainer.innerText = "Status: VALID"
+          messageContainer.classList.add("is-valid")
+        } else {
+          messageContainer.innerText = "Status: INVALID"
+          messageContainer.classList.add("is-invalid")
+        }
+
+        emailField.select()
+      })
+    </script>
+  </body>
+</html>
