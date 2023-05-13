@@ -1,7 +1,7 @@
 {
   "name": "@jrc03c/email-validator",
   "author": "jrc03c",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "validates email addresses",
   "license": "ISC",
   "main": "email-validator.js",
