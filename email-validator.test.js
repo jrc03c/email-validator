@@ -1,4 +1,4 @@
-const emailValidator = require(".")
+const EmailValidator = require(".")
 
 test("", () => {
   const items = [
@@ -22,9 +22,11 @@ test("", () => {
     { email: "someone@example test.com", shouldPass: false },
   ]
 
-  emailValidator.fetchTopLevelDomainList().then(() => {
+  const validator = new EmailValidator()
+
+  validator.fetchTopLevelDomainList().then(() => {
     items.forEach(item => {
-      expect(emailValidator.validate(item.email)).toBe(item.shouldPass)
+      expect(validator.validate(item.email)).toBe(item.shouldPass)
     })
   })
 })

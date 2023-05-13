@@ -141,9 +141,9 @@ class EmailValidator {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = new EmailValidator()
+  module.exports = EmailValidator
 }
 
 if (typeof window !== "undefined") {
-  window.emailValidator = new EmailValidator()
+  window.EmailValidator = EmailValidator
 }
