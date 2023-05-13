@@ -63,12 +63,42 @@
   var require_src = __commonJS({
     "src/index.js"(exports, module) {
       var uglyFetch = require_ugly_fetch();
+      function flatten(x) {
+        let out = [];
+        x.forEach((item) => {
+          if (isArray(item)) {
+            const children = flatten(item);
+            out = out.concat(children);
+          } else {
+            out.push(item);
+          }
+        });
+        return out;
+      }
+      function isArray(x) {
+        return x instanceof Array;
+      }
+      function isString(s) {
+        return typeof s === "string";
+      }
       var EmailValidator = class {
-        constructor() {
-          this.topLevelDomainList = [];
-        }
+        _topLevelDomainList = [];
         get isReady() {
           return this.topLevelDomainList.length > 0;
+        }
+        get topLevelDomainList() {
+          return this._topLevelDomainList;
+        }
+        set topLevelDomainList(value) {
+          if (!isArray(value)) {
+            throw new Error(
+              "The new value for `topLevelDomainList` must be an array!"
+            );
+          }
+          this._topLevelDomainList = flatten(value).filter((v) => isString(v));
+        }
+        async load(url) {
+          return await this.fetchTopLevelDomainList(url);
         }
         async fetchTopLevelDomainList(url) {
           if (!url) {
@@ -89,7 +119,7 @@
               "Before using an `EmailValidator` instance's `validate` method, you must first ask it to download a current top-level domain list using its async `fetchTopLevelDomainList` method!"
             );
           }
-          if (typeof email !== "string") {
+          if (!isString(email)) {
             return false;
           }
           email = email.toLowerCase();

@@ -1,12 +1,51 @@
 const uglyFetch = require("./ugly-fetch")
 
+function flatten(x) {
+  let out = []
+
+  x.forEach(item => {
+    if (isArray(item)) {
+      const children = flatten(item)
+      out = out.concat(children)
+    } else {
+      out.push(item)
+    }
+  })
+
+  return out
+}
+
+function isArray(x) {
+  return x instanceof Array
+}
+
+function isString(s) {
+  return typeof s === "string"
+}
+
 class EmailValidator {
-  constructor() {
-    this.topLevelDomainList = []
-  }
+  _topLevelDomainList = []
 
   get isReady() {
     return this.topLevelDomainList.length > 0
+  }
+
+  get topLevelDomainList() {
+    return this._topLevelDomainList
+  }
+
+  set topLevelDomainList(value) {
+    if (!isArray(value)) {
+      throw new Error(
+        "The new value for `topLevelDomainList` must be an array!"
+      )
+    }
+
+    this._topLevelDomainList = flatten(value).filter(v => isString(v))
+  }
+
+  async load(url) {
+    return await this.fetchTopLevelDomainList(url)
   }
 
   async fetchTopLevelDomainList(url) {
@@ -36,7 +75,7 @@ class EmailValidator {
       )
     }
 
-    if (typeof email !== "string") {
+    if (!isString(email)) {
       return false
     }
 

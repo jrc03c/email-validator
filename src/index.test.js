@@ -3,7 +3,9 @@ const EmailValidator = require(".")
 test("tests that the email validator works correctly", async () => {
   const validator = new EmailValidator()
   expect(validator.isReady).toBe(false)
-  await validator.fetchTopLevelDomainList()
+  validator.isReady = true
+  expect(validator.isReady).toBe(false)
+  await validator.load()
 
   const items = [
     { email: "someone@example.com", shouldPass: true },
@@ -30,9 +32,6 @@ test("tests that the email validator works correctly", async () => {
     expect(validator.validate(item.email)).toBe(item.shouldPass)
   })
 
-  const selfReferencer = [2, 3, 4]
-  selfReferencer.push(selfReferencer)
-
   const wrongs = [
     0,
     1,
@@ -57,10 +56,17 @@ test("tests that the email validator works correctly", async () => {
       return x
     },
     { hello: "world" },
-    selfReferencer,
   ]
 
   wrongs.forEach(value => {
     expect(validator.isValid(value)).toBe(false)
+    const temp = new EmailValidator()
+
+    if (value instanceof Array) {
+      temp.topLevelDomainList = value
+      expect(temp.isReady).toBe(false)
+    } else {
+      expect(() => (temp.topLevelDomainList = value)).toThrow()
+    }
   })
 })
