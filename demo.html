@@ -6,7 +6,6 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
-
     <style>
       *,
       input {
@@ -39,13 +38,6 @@
         width: 100%;
         box-sizing: border-box;
         padding: 0.5em;
-        border-radius: 4px;
-        border: 1px solid gray;
-      }
-
-      input[type="submit"] {
-        padding: 0.5em;
-        cursor: pointer;
         border-radius: 4px;
         border: 1px solid gray;
       }
@@ -84,88 +76,122 @@
   <body>
     <h1>Email Validator Demo</h1>
 
-    <form id="email-validator-form">
-      <p>
-        <input type="text" id="email-field" autofocus />
-      </p>
-
-      <p>
-        <input type="submit" value="Check" />
-      </p>
-    </form>
+    <p>
+      <input type="text" id="email-field" autofocus />
+    </p>
 
     <div id="message">Status: NONE</div>
 
-    <script src="email-validator.js"></script>
+    <script src="node_modules/lodash/lodash.min.js"></script>
+    <script src="dist/email-validator.js"></script>
     <script>
-      // run tests
-      const items = [
-        { email: "someone@example.com", shouldPass: true },
-        { email: "s.o.m.e.o.n.e@e.x.a.m.p.l.e.com", shouldPass: true },
-        { email: "someone+test@example.com", shouldPass: true },
-        { email: "someone@example+test.com", shouldPass: true },
-        { email: "someone@example", shouldPass: false },
-        { email: "someone@雨.com", shouldPass: true },
-        { email: "雨@example.com", shouldPass: true },
-        { email: "雨@雨.雨", shouldPass: false },
-        { email: "someone@1.2.3.4", shouldPass: false },
-        { email: "@example.com", shouldPass: false },
-        { email: "someone@", shouldPass: false },
-        { email: "someone@example.thisshouldfail", shouldPass: false },
-        { email: "someoneexamplecom", shouldPass: false },
-        { email: "someone.example@com", shouldPass: false },
-        { email: "someone@123.456.789", shouldPass: false },
-        { email: "SOMEONE@EXAMPLE.COM", shouldPass: true },
-        { email: "someone@.com", shouldPass: false },
-        { email: "someone@example test.com", shouldPass: false },
-      ]
-
-      emailValidator.fetchTopLevelDomainList().then(() => {
-        items.forEach(item => {
-          if (emailValidator.validate(item.email) !== item.shouldPass) {
-            throw new Error(
-              `The email address "${item.email}" was ${
-                item.shouldPass ? "supposed" : "not supposed"
-              } to be labelled as valid, but it ${
-                item.shouldPass ? "wasn't" : "was"
-              }!`
-            )
-          }
-        })
-      })
-
-      console.log("All tests passed!")
-
-      // set up demo app
-      const form = document.getElementById("email-validator-form")
-      const emailField = document.getElementById("email-field")
-      const messageContainer = document.getElementById("message")
-
-      emailField.addEventListener("keydown", () => {
-        messageContainer.classList.remove("is-valid")
-        messageContainer.classList.remove("is-invalid")
-        messageContainer.innerText = "Status: NONE"
-      })
-
-      form.addEventListener("submit", event => {
-        event.stopPropagation()
-        event.preventDefault()
-
-        messageContainer.classList.remove("is-valid")
-        messageContainer.classList.remove("is-invalid")
-
-        const isValid = emailValidator.validate(emailField.value)
-
-        if (isValid) {
-          messageContainer.innerText = "Status: VALID"
-          messageContainer.classList.add("is-valid")
-        } else {
-          messageContainer.innerText = "Status: INVALID"
-          messageContainer.classList.add("is-invalid")
+      function expect(v1) {
+        return {
+          toBe(v2) {
+            if (v1 !== v2) {
+              throw new Error(`Expected ${v2} but received ${v1}!`)
+            }
+          },
         }
+      }
 
-        emailField.select()
-      })
+      async function run() {
+        // run tests
+        const validator = new EmailValidator()
+        expect(validator.isReady).toBe(false)
+        await validator.fetchTopLevelDomainList()
+
+        const items = [
+          { email: "someone@example.com", shouldPass: true },
+          { email: "s.o.m.e.o.n.e@e.x.a.m.p.l.e.com", shouldPass: true },
+          { email: "someone+test@example.com", shouldPass: true },
+          { email: "someone@example+test.com", shouldPass: true },
+          { email: "someone@example", shouldPass: false },
+          { email: "someone@雨.com", shouldPass: true },
+          { email: "雨@example.com", shouldPass: true },
+          { email: "雨@雨.雨", shouldPass: false },
+          { email: "someone@1.2.3.4", shouldPass: false },
+          { email: "@example.com", shouldPass: false },
+          { email: "someone@", shouldPass: false },
+          { email: "someone@example.thisshouldfail", shouldPass: false },
+          { email: "someoneexamplecom", shouldPass: false },
+          { email: "someone.example@com", shouldPass: false },
+          { email: "someone@123.456.789", shouldPass: false },
+          { email: "SOMEONE@EXAMPLE.COM", shouldPass: true },
+          { email: "someone@.com", shouldPass: false },
+          { email: "someone@example test.com", shouldPass: false },
+        ]
+
+        items.forEach(item => {
+          expect(validator.validate(item.email)).toBe(item.shouldPass)
+        })
+
+        const selfReferencer = [2, 3, 4]
+        selfReferencer.push(selfReferencer)
+
+        const wrongs = [
+          0,
+          1,
+          2.3,
+          -2.3,
+          Infinity,
+          -Infinity,
+          NaN,
+          "foo",
+          true,
+          false,
+          null,
+          undefined,
+          Symbol.for("Hello, world!"),
+          [2, 3, 4],
+          [
+            [2, 3, 4],
+            [5, 6, 7],
+          ],
+          x => x,
+          function (x) {
+            return x
+          },
+          { hello: "world" },
+          selfReferencer,
+        ]
+
+        wrongs.forEach(value => {
+          expect(validator.isValid(value)).toBe(false)
+        })
+
+        console.log("All automated tests passed!")
+
+        // set up demo app
+        const emailField = document.getElementById("email-field")
+        const messageContainer = document.getElementById("message")
+
+        emailField.addEventListener(
+          "input",
+          _.debounce(() => {
+            if (emailField.value.trim().length === 0) {
+              messageContainer.classList.remove("is-valid")
+              messageContainer.classList.remove("is-invalid")
+              messageContainer.innerText = "Status: NONE"
+              return
+            }
+
+            const isValid = validator.validate(emailField.value)
+
+            if (isValid) {
+              messageContainer.innerText = "Status: VALID"
+              messageContainer.classList.remove("is-invalid")
+              messageContainer.classList.add("is-valid")
+            } else {
+              messageContainer.innerText = "Status: INVALID"
+              messageContainer.classList.remove("is-valid")
+              messageContainer.classList.add("is-invalid")
+            }
+          }, 10)
+        )
+      }
+
+      run()
     </script>
   </body>
 </html>
