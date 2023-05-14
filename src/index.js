@@ -1,5 +1,3 @@
-const uglyFetch = require("./ugly-fetch")
-
 function flatten(x) {
   let out = []
 
@@ -53,7 +51,7 @@ class EmailValidator {
       url = "https://data.iana.org/TLD/tlds-alpha-by-domain.txt"
     }
 
-    const response = await uglyFetch(url)
+    const response = await fetch(url)
     const raw = await response.text()
     const lines = raw.toLowerCase().split("\n")
 

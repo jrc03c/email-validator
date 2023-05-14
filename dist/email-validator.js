@@ -1,68 +1,12 @@
 (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-    get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-  }) : x)(function(x) {
-    if (typeof require !== "undefined")
-      return require.apply(this, arguments);
-    throw new Error('Dynamic require of "' + x + '" is not supported');
-  });
-  var __commonJS = (cb, mod) => function __require2() {
+  var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
-
-  // src/ugly-fetch.js
-  var require_ugly_fetch = __commonJS({
-    "src/ugly-fetch.js"(exports, module) {
-      var uglyFetch = (() => {
-        if (typeof fetch !== "undefined") {
-          return fetch;
-        } else {
-          try {
-            const https = __require("https");
-            class Response {
-              constructor(data) {
-                this.data = data;
-              }
-              async text() {
-                return this.data;
-              }
-            }
-            return function fetch2(url) {
-              return new Promise((resolve, reject) => {
-                try {
-                  let data = "";
-                  const request = https.get(url, (response) => {
-                    response.on("data", (d) => {
-                      data += d;
-                    });
-                    response.on("end", () => {
-                      resolve(new Response(data));
-                    });
-                  });
-                  request.on("error", (e) => {
-                    reject(e);
-                  });
-                } catch (e) {
-                  reject(e);
-                }
-              });
-            };
-          } catch (e) {
-            throw new Error(
-              "It doesn't seem like there's a `fetch` function available! This means that `EmailValidator` won't work since it needs to download a top-level domain list using a `fetch` function. Please import or define one before importing `EmailValidator`!"
-            );
-          }
-        }
-      })();
-      module.exports = uglyFetch;
-    }
-  });
 
   // src/index.js
   var require_src = __commonJS({
     "src/index.js"(exports, module) {
-      var uglyFetch = require_ugly_fetch();
       function flatten(x) {
         let out = [];
         x.forEach((item) => {
@@ -104,7 +48,7 @@
           if (!url) {
             url = "https://data.iana.org/TLD/tlds-alpha-by-domain.txt";
           }
-          const response = await uglyFetch(url);
+          const response = await fetch(url);
           const raw = await response.text();
           const lines = raw.toLowerCase().split("\n");
           this.topLevelDomainList = lines.map((line) => line.trim()).filter((line) => !line.match(/\s/g));
