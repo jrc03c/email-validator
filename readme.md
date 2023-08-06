@@ -1,7 +1,7 @@
 # Installation
 
 ```bash
-npm install --save https://github.com/jrc03c/email-validator
+npm install --save @jrc03c/email-validator
 ```
 
 # Usage
